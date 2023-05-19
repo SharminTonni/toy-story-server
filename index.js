@@ -80,15 +80,26 @@ async function run() {
 
     app.get("/mytoys/:email", async (req, res) => {
       console.log(req.params.email);
+      const options = {
+        sort: { price: 1 },
+      };
+      const toys = await toysCollection
+        .find({ sellerEmail: req.params.email }, options)
 
-      const result = await toysCollection
-        .find({ sellerEmail: req.params.email })
         .toArray();
-      res.send(result);
+
+      const sortedProducts = toys.sort((a, b) => {
+        const priceA = parseFloat(a.price);
+        const priceB = parseFloat(b.price);
+
+        return priceA - priceB;
+      });
+      res.send(sortedProducts);
     });
 
     app.post("/toys", async (req, res) => {
       const toy = req.body;
+      toy.price = parseFloat(toy.price);
       const result = await toysCollection.insertOne(toy);
       res.send(result);
     });
