@@ -46,7 +46,7 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/toys/:category", async (req, res) => {
+    app.get("/mytoys/:category", async (req, res) => {
       const category = req.params.category;
       if (category == "police" || category == "truck" || category == "luxury") {
         const result = await toysCollection
@@ -62,9 +62,47 @@ async function run() {
 
     // all toys api'
 
-    app.get("/toys", async (req, res) => {
+    app.get("/mytoys", async (req, res) => {
       const result = await toysCollection.find().limit(20).toArray();
       res.send(result);
+    });
+
+    app.get("/all/:text", async (req, res) => {
+      console.log(req.query.email);
+      const searchText = req.params.text;
+
+      if (searchText === "ascending") {
+        const options = {
+          sort: { price: 1 },
+        };
+        const toys = await toysCollection
+          .find({ sellerEmail: req.query.email }, options)
+          .toArray();
+        const sortedToys = toys.sort((a, b) => {
+          const priceA = a.price;
+          const priceB = b.price;
+          return priceA - priceB;
+        });
+        return res.send(sortedToys);
+      } else if (searchText === "descending") {
+        const options = {
+          sort: { price: -1 },
+        };
+        const toys = await toysCollection
+          .find({ sellerEmail: req.query.email }, options)
+          .toArray();
+        const sortedToys = toys.sort((a, b) => {
+          const priceA = a.price;
+          const priceB = b.price;
+          return priceB - priceA;
+        });
+        return res.send(sortedToys);
+      } else {
+        const result = await toysCollection
+          .find({ sellerEmail: req.query.email })
+          .toArray();
+        return res.send(result);
+      }
     });
 
     // get details about single toys
@@ -76,25 +114,6 @@ async function run() {
 
       const result = await toysCollection.findOne(query);
       res.send(result);
-    });
-
-    app.get("/mytoys/:email", async (req, res) => {
-      console.log(req.params.email);
-      const options = {
-        sort: { price: 1 },
-      };
-      const toys = await toysCollection
-        .find({ sellerEmail: req.params.email }, options)
-
-        .toArray();
-
-      const sortedProducts = toys.sort((a, b) => {
-        const priceA = parseFloat(a.price);
-        const priceB = parseFloat(b.price);
-
-        return priceA - priceB;
-      });
-      res.send(sortedProducts);
     });
 
     app.post("/toys", async (req, res) => {
