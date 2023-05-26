@@ -1,8 +1,8 @@
 const express = require("express");
-const cors = require("cors");
-require("dotenv").config();
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+const cors = require("cors");
 const app = express();
+require("dotenv").config();
 
 const port = process.env.PORT || 5000;
 const corsConfig = {
@@ -16,7 +16,7 @@ app.use(cors(corsConfig));
 app.options("", cors(corsConfig));
 app.use(express.json());
 
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.78xjoll.mongodb.net/?retryWrites=true&w=majority`;
+const uri = `mongodb+srv://toyStory:eboaaZYBw1W98esc@cluster0.78xjoll.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -33,19 +33,19 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    client.connect((err) => {
-      if (err) {
-        console.error(err);
-        return;
-      }
-    });
+    // client.connect((err) => {
+    //   if (err) {
+    //     console.error(err);
+    //     return;
+    //   }
+    // });
 
     const toysCollection = client.db("toyStory").collection("toys");
 
     const indexKeys = { title: 1 };
     const indexOptions = { name: "title" };
 
-    const result = await toysCollection.createIndex(indexKeys, indexOptions);
+    // const result = await toysCollection.createIndex(indexKeys, indexOptions);
 
     app.get("/toysByTitle/:text", async (req, res) => {
       const searchText = req.params.text;
@@ -60,7 +60,7 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/mytoys/:category", async (req, res) => {
+    app.get("/mytoy/:category", async (req, res) => {
       const category = req.params.category;
       if (category == "police" || category == "truck" || category == "luxury") {
         const result = await toysCollection
@@ -77,7 +77,7 @@ async function run() {
     // all toys api'
 
     app.get("/mytoys", async (req, res) => {
-      const result = await toysCollection.find().limit(20).toArray();
+      const result = await toysCollection.find({}).limit(20).toArray();
       res.send(result);
     });
 
@@ -161,10 +161,10 @@ async function run() {
     });
 
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
-    console.log(
-      "Pinged your deployment. You successfully connected to MongoDB!"
-    );
+    // await client.db("admin").command({ ping: 1 });
+    // console.log(
+    //   "Pinged your deployment. You successfully connected to MongoDB!"
+    // );
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
